@@ -60,11 +60,12 @@ class _NonLocalBlockND(nn.Module):
             self.g = nn.Sequential(self.g, max_pool_layer)
             self.phi = nn.Sequential(self.phi, max_pool_layer)
 
-    def forward(self, x):
-        '''
+    def forward(self, x, return_nl_map=False):
+        """
         :param x: (b, c, t, h, w)
+        :param return_nl_map: if True return z, nl_map, else only return z.
         :return:
-        '''
+        """
 
         batch_size = x.size(0)
 
@@ -84,6 +85,8 @@ class _NonLocalBlockND(nn.Module):
         W_y = self.W(y)
         z = W_y + x
 
+        if return_nl_map:
+            return z, f_div_C
         return z
 
 
@@ -114,19 +117,19 @@ class NONLocalBlock3D(_NonLocalBlockND):
 if __name__ == '__main__':
     import torch
 
-    for (sub_sample, bn_layer) in [(True, True), (False, False), (True, False), (False, True)]:
+    for (sub_sample_, bn_layer_) in [(True, True), (False, False), (True, False), (False, True)]:
         img = torch.zeros(2, 3, 20)
-        net = NONLocalBlock1D(3, sub_sample=sub_sample, bn_layer=bn_layer)
+        net = NONLocalBlock1D(3, sub_sample=sub_sample_, bn_layer=bn_layer_)
         out = net(img)
         print(out.size())
 
         img = torch.zeros(2, 3, 20, 20)
-        net = NONLocalBlock2D(3, sub_sample=sub_sample, bn_layer=bn_layer)
+        net = NONLocalBlock2D(3, sub_sample=sub_sample_, bn_layer=bn_layer_)
         out = net(img)
         print(out.size())
 
         img = torch.randn(2, 3, 8, 20, 20)
-        net = NONLocalBlock3D(3, sub_sample=sub_sample, bn_layer=bn_layer)
+        net = NONLocalBlock3D(3, sub_sample=sub_sample_, bn_layer=bn_layer_)
         out = net(img)
         print(out.size())
 

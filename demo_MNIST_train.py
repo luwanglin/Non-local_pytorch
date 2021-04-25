@@ -6,12 +6,6 @@ from torch import nn
 import time
 
 
-def calc_acc(x, y):
-    x = torch.max(x, dim=-1)[1]
-    accuracy = sum(x == y) / x.size(0)
-    return accuracy
-
-
 train_data = torchvision.datasets.MNIST(root='./mnist', train=True,
                                         transform=torchvision.transforms.ToTensor(),
                                         download=True)
@@ -33,7 +27,7 @@ if torch.cuda.is_available():
 opt = torch.optim.Adam(net.parameters(), lr=0.001)
 loss_func = nn.CrossEntropyLoss()
 
-for epoch_index in range(20):
+for epoch_index in range(10):
     st = time.time()
 
     torch.set_grad_enabled(True)
@@ -44,7 +38,6 @@ for epoch_index in range(20):
             label_batch = label_batch.cuda()
 
         predict = net(img_batch)
-        acc = calc_acc(predict.cpu().data, label_batch.cpu().data)
         loss = loss_func(predict, label_batch)
 
         net.zero_grad()
@@ -80,4 +73,9 @@ for epoch_index in range(20):
     mean_loss = sum(total_loss) / total_loss.__len__()
 
     print('[Test] epoch[%d/%d] acc:%.4f%% loss:%.4f\n'
-          % (epoch_index, 100, mean_acc * 100, mean_loss.item()))
+          % (epoch_index, 10, mean_acc * 100, mean_loss.item()))
+
+# weight_path = 'weights/net.pth'
+# print('Save Net weights to', weight_path)
+# net.cpu()
+# torch.save(net.state_dict(), weight_path)
